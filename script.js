@@ -619,10 +619,7 @@ function csvEscape(value) {
   return /[";\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
-function exportLog() {
-  const entries = readLog();
-  if (!entries.length) return;
-
+function buildCsv(entries) {
   const rows = [
     ["Ora", "Località", "Temperatura (°C)", "Vento (km/h)", "Direzione", "Probabilità pioggia (%)"],
     ...entries.map((entry) => [
@@ -635,19 +632,60 @@ function exportLog() {
     ]),
   ];
 
-  const csv =
-    "\uFEFF" + rows.map((row) => row.map(csvEscape).join(";")).join("\r\n");
+  return (
+    "\uFEFF" + rows.map((row) => row.map(csvEscape).join(";")).join("\r\n")
+  );
+}
+
+function classicDownload(csv, filename) {
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
 
   const link = document.createElement("a");
   link.href = url;
-  link.download = `meteo-log-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.download = filename;
   document.body.appendChild(link);
   link.click();
   link.remove();
 
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function exportLog() {
+  const entries = readLog();
+  if (!entries.length) return;
+
+  const csv = buildCsv(entries);
+  const filename = `meteo-log-${new Date().toISOString().slice(0, 10)}.csv`;
+
+  // Chiede esplicitamente dove salvare (Chrome, Edge e browser compatibili).
+  if (typeof window.showSaveFilePicker === "function") {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [
+          {
+            description: "File CSV",
+            accept: { "text/csv": [".csv"] },
+          },
+        ],
+      });
+
+      const writable = await handle.createWritable();
+      await writable.write(csv);
+      await writable.close();
+      return;
+    } catch (err) {
+      // Se l'utente annulla, non fare nulla.
+      if (err && err.name === "AbortError") return;
+      console.warn(
+        "Dialogo di salvataggio non disponibile, uso il download classico.",
+        err
+      );
+    }
+  }
+
+  classicDownload(csv, filename);
 }
 
 /* ---------- Caricamento meteo ---------- */
