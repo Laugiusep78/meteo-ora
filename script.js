@@ -36,7 +36,7 @@ const els = {
   currentCard: document.getElementById("current-card"),
   nextCard: document.getElementById("next-card"),
   place: document.getElementById("place-name"),
-  currentTime: document.getElementById("current-time"),
+  currentTime: document.getElementById("current-clock"),
   dayBadge: document.getElementById("day-badge"),
   currentIcon: document.getElementById("current-icon"),
   currentTemp: document.getElementById("current-temp"),
@@ -500,6 +500,13 @@ function getNextHour(hourly, currentTime) {
 }
 
 /* ---------- Rendering ---------- */
+function updateClock(data) {
+  const source = data || state.data;
+  if (!source) return;
+  const now = getLocationNow() || source.current.time;
+  els.currentTime.textContent = clock(now);
+}
+
 function render(data, place) {
   const current = data.current;
   const info = weatherInfo(current.weather_code);
@@ -507,7 +514,7 @@ function render(data, place) {
   state.isDay = isDay;
 
   els.place.textContent = place.name || "La mia posizione";
-  els.currentTime.textContent = `Ora locale ${clock(current.time)}`;
+  updateClock(data);
   els.dayBadge.textContent = isDay ? "☀ Giorno" : "☾ Notte";
 
   els.currentCard.dataset.weather = info.theme;
@@ -1026,7 +1033,11 @@ function init() {
   }, REFRESH_MS);
 
   // Passaggio automatico giorno/notte in base ad alba e tramonto
-  setInterval(refreshDayNight, 30 * 1000);
+  // Orologio e passaggio automatico giorno/notte
+  setInterval(() => {
+    updateClock();
+    refreshDayNight();
+  }, 10 * 1000);
 
   // Aggiorna al ritorno sulla scheda, se i dati sono vecchi
   document.addEventListener("visibilitychange", () => {
