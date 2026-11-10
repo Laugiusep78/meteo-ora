@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MeteoOra — Meteo attuale e prossima ora</title>
+  <meta name="description" content="Meteo attuale alla tua posizione e previsione per la prossima ora, con ricerca città, tema chiaro/scuro e dati Open-Meteo." />
+  <meta name="theme-color" content="#f7f8fb" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌤️</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="#" class="logo" aria-label="MeteoOra, torna all'inizio">Meteo<span>Ora</span></a>
+
+      <div class="header-actions">
+        <button id="refresh-btn" class="icon-btn" type="button" aria-label="Aggiorna i dati meteo" title="Aggiorna">
+          <span aria-hidden="true">↻</span>
+        </button>
+        <button id="theme-toggle" class="icon-btn" type="button" aria-label="Cambia tema">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main">
+    <section class="locator" aria-label="Scegli la posizione">
+      <button id="geo-btn" class="btn btn-primary" type="button">
+        <span aria-hidden="true">📍</span> Usa la mia posizione
+      </button>
+
+      <div class="search-wrap">
+        <label class="visually-hidden" for="city-input">Cerca una città</label>
+        <input
+          id="city-input"
+          type="search"
+          placeholder="Oppure cerca una città…"
+          autocomplete="off"
+          spellcheck="false"
+          role="combobox"
+          aria-expanded="false"
+          aria-controls="city-results"
+          aria-autocomplete="list"
+        />
+        <ul id="city-results" class="results" role="listbox" aria-label="Città trovate" hidden></ul>
+      </div>
+    </section>
+
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+
+    <section id="weather" class="weather-grid" aria-busy="true" aria-label="Meteo attuale e prossima ora">
+      <article id="current-card" class="card current-card" data-weather="clear" data-day="true">
+        <div class="current-head">
+          <div>
+            <p class="eyebrow" id="place-name">—</p>
+            <p class="current-time" id="current-time"></p>
+          </div>
+          <span class="badge" id="day-badge">—</span>
+        </div>
+
+        <div class="current-main">
+          <div class="weather-icon" id="current-icon" aria-hidden="true"></div>
+          <div class="temp-wrap">
+            <p class="temp" id="current-temp">—<span>°C</span></p>
+            <p class="condition" id="current-condition">—</p>
+          </div>
+        </div>
+
+        <dl class="details">
+          <div><dt>Percepita</dt><dd id="feels">—</dd></div>
+          <div><dt>Umidità</dt><dd id="humidity">—</dd></div>
+          <div><dt>Vento</dt><dd id="wind">—</dd></div>
+          <div><dt>Precipitazioni</dt><dd id="precip">—</dd></div>
+          <div><dt>Pressione</dt><dd id="pressure">—</dd></div>
+          <div><dt>Alba</dt><dd id="sunrise">—</dd></div>
+          <div><dt>Tramonto</dt><dd id="sunset">—</dd></div>
+        </dl>
+      </article>
+
+      <article id="next-card" class="card next-card">
+        <p class="eyebrow">Prossima ora</p>
+        <p class="next-time" id="next-time">—</p>
+
+        <div class="next-main">
+          <div class="weather-icon small" id="next-icon" aria-hidden="true"></div>
+          <p class="next-temp" id="next-temp">—<span>°C</span></p>
+        </div>
+
+        <p class="condition" id="next-condition">—</p>
+
+        <ul class="next-details">
+          <li><span>Probabilità di pioggia</span><strong id="next-rain">—</strong></li>
+          <li><span>Vento</span><strong id="next-wind">—</strong></li>
+        </ul>
+      </article>
+    </section>
+
+    <p class="source">
+      Dati meteo: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>
+      · Aggiornato <span id="updated">—</span>
+    </p>
+
+    <section class="log" aria-labelledby="log-title">
+      <div class="log-head">
+        <div>
+          <h2 id="log-title" class="log-title">Registro orario</h2>
+          <p class="log-hint">Una voce ogni ora, salvata in questo browser.</p>
+        </div>
+        <div class="log-actions">
+          <button id="log-export" class="btn btn-ghost" type="button" disabled>Scarica CSV</button>
+          <button id="log-clear" class="btn btn-ghost" type="button" disabled>Svuota</button>
+        </div>
+      </div>
+
+      <div class="log-table-wrap">
+        <table id="log-table" class="log-table" hidden>
+          <thead>
+            <tr>
+              <th scope="col">Ora</th>
+              <th scope="col">Località</th>
+              <th scope="col" class="num">Temp.</th>
+              <th scope="col" class="num">Vento</th>
+              <th scope="col" class="num">Direzione</th>
+              <th scope="col" class="num">Pioggia</th>
+            </tr>
+          </thead>
+          <tbody id="log-body"></tbody>
+        </table>
+        <p id="log-empty" class="log-empty">Nessuna voce ancora: il registro si popola ogni ora.</p>
+      </div>
+    </section>
+
+    <noscript>
+      <p class="status error">Questa pagina richiede JavaScript per mostrare il meteo.</p>
+    </noscript>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© <span id="year"></span> MeteoOra — fatto con HTML, CSS e JavaScript puri.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
