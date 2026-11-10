@@ -58,6 +58,7 @@ const els = {
   geoBtn: document.getElementById("geo-btn"),
   refreshBtn: document.getElementById("refresh-btn"),
   themeToggle: document.getElementById("theme-toggle"),
+  fullscreenBtn: document.getElementById("fullscreen-btn"),
   cityInput: document.getElementById("city-input"),
   results: document.getElementById("city-results"),
   logTable: document.getElementById("log-table"),
@@ -357,6 +358,46 @@ function refreshDayNight() {
   updateDayNightUI(day);
 
   if (themeMode === "auto") applyTheme();
+}
+
+/* ---------- Tutto schermo ---------- */
+function fullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || null;
+}
+
+function updateFullscreenButton() {
+  const active = Boolean(fullscreenElement());
+
+  // In tutto schermo il pulsante scompare; per uscire basta Esc.
+  els.fullscreenBtn.hidden = active;
+  els.fullscreenBtn.setAttribute(
+    "aria-label",
+    active ? "Esci da tutto schermo" : "Attiva tutto schermo"
+  );
+  els.fullscreenBtn.title = active ? "Esci da tutto schermo (Esc)" : "Tutto schermo";
+}
+
+async function toggleFullscreen() {
+  try {
+    if (fullscreenElement()) {
+      if (document.exitFullscreen) await document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      return;
+    }
+
+    const root = document.documentElement;
+
+    if (root.requestFullscreen) {
+      await root.requestFullscreen();
+    } else if (root.webkitRequestFullscreen) {
+      root.webkitRequestFullscreen();
+    } else {
+      setStatus("Il browser non supporta lo schermo intero.", "error");
+    }
+  } catch (err) {
+    console.warn("Tutto schermo non disponibile.", err);
+    setStatus("Impossibile attivare lo schermo intero.", "error");
+  }
 }
 
 /* ---------- Posizione salvata ---------- */
@@ -891,6 +932,10 @@ function bindEvents() {
 
   els.geoBtn.addEventListener("click", () => locate());
 
+  els.fullscreenBtn.addEventListener("click", toggleFullscreen);
+  document.addEventListener("fullscreenchange", updateFullscreenButton);
+  document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
+
   els.refreshBtn.addEventListener("click", () => {
     if (state.lat != null && state.place) {
       loadWeather(state.place);
@@ -964,6 +1009,7 @@ function init() {
   initTheme();
   bindEvents();
   renderLog();
+  updateFullscreenButton();
 
   const savedPlace = loadSavedPlace();
   if (savedPlace) {

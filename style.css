@@ -137,6 +137,15 @@ a {
   border-color: var(--primary);
 }
 
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.icon-btn[hidden] {
+  display: none;
+}
+
 .icon-btn:active {
   transform: scale(0.95);
 }
