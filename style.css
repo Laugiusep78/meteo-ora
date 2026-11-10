@@ -362,27 +362,28 @@ a {
 .current-time {
   display: inline-flex;
   align-items: baseline;
-  gap: 0.45rem;
-  margin-top: 0.4rem;
-  padding: 0.22rem 0.65rem;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  padding: 0.3rem 0.85rem;
   border: 1px solid var(--border);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  white-space: nowrap;
 }
 
 .current-time .time-label {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
 .current-time .time-value {
-  font-size: 1.2rem;
+  font-size: clamp(2rem, 5vw, 2.8rem);
   font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
+  line-height: 1;
+  letter-spacing: -0.03em;
   color: var(--text);
   font-variant-numeric: tabular-nums;
 }
